@@ -1,7 +1,7 @@
-def registry= "940090592876.dkr.ecr.us-east-1.amazonaws.com"
+def registry= "940090592876.dkr.ecr.ca-central-1.amazonaws.com"
 def tag = ""
-def ms = ""
-def region = "us-east-1"
+def ms = "result"
+def region = "ca-central-1"
 
 pipeline{
     agent any
@@ -77,6 +77,6 @@ def getTag(){
     tag = "${version}-develop"
   } else {
     tag = "${version}-${env.BRANCH_NAME}"
-  }
-return tag 
+  }
+return tag 
 }
