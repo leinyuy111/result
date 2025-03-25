@@ -1,4 +1,4 @@
-def registry= "940090592876.dkr.ecr.ca-central-1.amazonaws.com"
+def registry= "975050242866.dkr.ecr.ca-central-1.amazonaws.com"
 def tag = ""
 def ms = "result"
 def region = "ca-central-1"
@@ -10,7 +10,7 @@ pipeline{
             steps{
                 script{
                     tag = getTag()
-                    ms = getMsName()
+                  //  ms = getMsName()
                 }
             }
         }
@@ -25,32 +25,29 @@ pipeline{
         stage("Login to Ecr"){
             steps{
                 script{
-                    withAWS(region:"$region",credentials:'aws_creds'){
                         sh "aws ecr get-login-password --region ${region} | docker login --username AWS --password-stdin ${registry}"
                     }
                 }
             }
-        }
 
         stage("Docker push"){
             steps{
                 script{
-                    withAWS(region:"$region",credentials:'aws_creds'){
                         sh "docker push ${registry}/${ms}:${tag}"
                     }
                 }
             }
-        }
 
         stage("Deploy to Dev"){
             when{branch 'develop'}
             steps{
                 script{
-                        sh "aws eks update-kubeconfig --name vote-dev"
+                    withAWS(region: region, credentials:'aws_creds'){
+                        sh "aws eks update-kubeconfig --name result-dev"
                         sh 'sudo curl -o /usr/local/bin/kubectl -LO "https://dl.k8s.io/release/v1.28.5/bin/linux/amd64/kubectl"' 
                         sh 'sudo chmod +x /usr/local/bin/kubectl'
-                        sh "./kubectl set image deploy/result result=${registry}/${ms}:${tag} -n vote "
-                        sh "./kubectl rollout restart deploy/result -n vote"
+                        sh "./kubectl set image deploy/result result=${registry}/${ms}:${tag} -n result"
+                        sh "./kubectl rollout restart deploy/result -n result"
                     }
                 }
             }
